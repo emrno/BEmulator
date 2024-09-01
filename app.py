@@ -36,8 +36,6 @@ def execute():
             output = f"cd: no such file or directory: {path}"
     elif command == "clear":
         output = "CLEAR"
-    elif command == "exit":
-    	output = "EXIT"
     else:
         try:
             result = subprocess.run(command, shell=True, cwd=current_directory, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

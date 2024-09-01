@@ -65,7 +65,14 @@
             const outputLine = document.createElement("div");
             outputLine.textContent = `${currentDirectory} $ ${command}`;
             output.appendChild(outputLine);
-
+            
+            // i feel like this will not work tbh
+            if (command === "exit") {
+            	window.close();
+            	return;
+            }
+            // i feel like this will not work tbh
+            
             try {
                 const response = await fetch("/execute", {
                     method: "POST",
@@ -80,8 +87,6 @@
                 
                 if (result.output === "CLEAR") {
                     output.innerHTML = "";
-                } else if (result.output == "EXIT") {
-                    window.close();
                 } else {
                     resultLine.textContent = result.output;
                     output.appendChild(resultLine);
