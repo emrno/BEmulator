@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Bash Shell Emulator</title>
+    <title>BEmulator</title>
     <style>
         body {
             font-family: monospace;
@@ -45,46 +45,43 @@
     </div>
 
     <script>
-        const output = document.getElementById('output');
-        const commandInput = document.getElementById('command-input');
-        const prompt = document.getElementById('prompt');
+        const output = document.getElementById("output");
+        const commandInput = document.getElementById("command-input");
+        const prompt = document.getElementById("prompt");
 
-        let currentDirectory = '~';
+        let currentDirectory = "~";
 
-        commandInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
+        commandInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
                 const command = commandInput.value.trim();
                 if (command) {
                     executeCommand(command);
                 }
-                commandInput.value = '';
+                commandInput.value = "";
             }
         });
 
         async function executeCommand(command) {
-            const outputLine = document.createElement('div');
+            const outputLine = document.createElement("div");
             outputLine.textContent = `${currentDirectory} $ ${command}`;
             output.appendChild(outputLine);
-            
-            if (command === "exit") {
-            	window.close();
-            	return;
-            }
 
             try {
-                const response = await fetch('/execute', {
-                    method: 'POST',
+                const response = await fetch("/execute", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
                     body: JSON.stringify({ command }),
                 });
 
                 const result = await response.json();
-                const resultLine = document.createElement('div');
+                const resultLine = document.createElement("div");
                 
-                if (result.output === 'CLEAR') {
-                    output.innerHTML = '';
+                if (result.output === "CLEAR") {
+                    output.innerHTML = "";
+                } else if (result.output == "EXIT") {
+                    window.close();
                 } else {
                     resultLine.textContent = result.output;
                     output.appendChild(resultLine);
@@ -93,8 +90,8 @@
                 currentDirectory = result.current_directory;
                 prompt.textContent = `user@emulator:${currentDirectory}$`;
             } catch (error) {
-                const errorLine = document.createElement('div');
-                errorLine.textContent = 'Error executing command';
+                const errorLine = document.createElement("div");
+                errorLine.textContent = "Error executing command";
                 output.appendChild(errorLine);
             }
 
