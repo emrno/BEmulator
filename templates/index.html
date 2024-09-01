@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Bash Shell Emulator</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #1e1e1e;
+            color: #00ff00;
+            margin: 0;
+            padding: 10px;
+        }
+        #terminal {
+            border: 1px solid #333;
+            padding: 10px;
+            height: 90vh;
+            overflow-y: auto;
+            background-color: #000;
+        }
+        #input-line {
+            display: flex;
+        }
+        #prompt {
+            margin-right: 10px;
+        }
+        #command-input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: #00ff00;
+            outline: none;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt">user@emulator:~$</span>
+            <input type="text" id="command-input" autofocus>
+        </div>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        const commandInput = document.getElementById('command-input');
+        const prompt = document.getElementById('prompt');
+
+        let currentDirectory = '~';
+
+        commandInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = commandInput.value.trim();
+                if (command) {
+                    executeCommand(command);
+                }
+                commandInput.value = '';
+            }
+        });
+
+        async function executeCommand(command) {
+            const outputLine = document.createElement('div');
+            outputLine.textContent = `${currentDirectory} $ ${command}`;
+            output.appendChild(outputLine);
+            
+            if (command === "exit") {
+            	window.close();
+            	return;
+            }
+
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command }),
+                });
+
+                const result = await response.json();
+                const resultLine = document.createElement('div');
+                
+                if (result.output === 'CLEAR') {
+                    output.innerHTML = '';
+                } else {
+                    resultLine.textContent = result.output;
+                    output.appendChild(resultLine);
+                }
+
+                currentDirectory = result.current_directory;
+                prompt.textContent = `user@emulator:${currentDirectory}$`;
+            } catch (error) {
+                const errorLine = document.createElement('div');
+                errorLine.textContent = 'Error executing command';
+                output.appendChild(errorLine);
+            }
+
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>
